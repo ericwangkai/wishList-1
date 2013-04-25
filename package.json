@@ -7,6 +7,6 @@
         "express": "3.x",
         "ejs": ">= 0.0.1",
         "nconf": ">= 0.5.1",
-        "everyauth": ">= 0.3.0"
+        "passport": "*"
     }
 }

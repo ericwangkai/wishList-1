@@ -5,89 +5,16 @@
 
 var express = require('express'),
     routes = require('./routes'),
-    everyauth = require('everyauth'),
+    passport = require('passport'),
     api = require('./routes/api');
-
-/**
- * EVERYAUTH AUTHENTICATION
- * -------------------------------------------------------------------------------------------------
- * allows users to log in and register using OAuth services
- **/
-
-everyauth.debug = true;
-
-// Configure Facebook auth
-var usersById = {},
-    nextUserId = 0,
-    usersByFacebookId = {},
-    usersByTwitId = {},
-    usersByLogin = {
-        'user@example.com': addUser({ email: 'user@example.com', password: 'azure'})
-    };
-
-everyauth.
-    everymodule.
-    findUserById(function (id, callback) {
-        callback(null, usersById[id]);
-    });
-
-
-/**
- * FACEBOOK AUTHENTICATION
- * -------------------------------------------------------------------------------------------------
- * uncomment this section if you want to enable facebook authentication.  To use this, you will need
- * to get a facebook application Id and Secret, and add those to settings.json.  See:
- * http://developers.facebook.com/
- **/
-
-//everyauth.
-//    facebook.
-//    appId(nconf.get('facebook:applicationId')).
-//    appSecret(nconf.get('facebook:applicationSecret')).
-//    findOrCreateUser(
-//	function(session, accessToken, accessTokenExtra, fbUserMetadata){
-//	    return usersByFacebookId[fbUserMetadata.claimedIdentifier] ||
-//		(usersByFacebookId[fbUserMetadata.claimedIdentifier] =
-//		 addUser('facebook', fbUserMetadata));
-//	}).
-//    redirectPath('/');
-
-
-/**
- * TWITTER AUTHENTICATION
- * -------------------------------------------------------------------------------------------------
- * uncomment this section if you want to enable twitter authentication.  To use this, you will need
- * to get a twitter key and secret, and add those to settings.json.  See:
- * https://dev.twitter.com/
- **/
-/*
-everyauth
-    .twitter
-    .consumerKey(process.env.TWITTER_CONSUMER_KEY)
-    .consumerSecret(process.env.TWITTER_CONSUMER_SECRET)
-    .findOrCreateUser( function (sess, accessToken, accessSecret, twitUser) {
-        return usersByTwitId[twitUser.id] || (usersByTwitId[twitUser.id] = addUser('twitter', twitUser));
-    })
-    .redirectPath('/');
-*/
-// add a user to the in memory store of users.  If you were looking to use a persistent store, this
-// would be the place to start
-function addUser (source, sourceUser) {
-    var user;
-    if (arguments.length === 1) {
-        user = sourceUser = source;
-        user.id = ++nextUserId;
-        return usersById[nextUserId] = user;
-    } else { // non-password-based
-        user = usersById[++nextUserId] = {id: nextUserId};
-        user[source] = sourceUser;
-    }
-    return user;
-}
 
 var app = module.exports = express();
 
+var DB = require('./accessDB');
+var conn = 'mongodb://localhost/test';
+var db;
 // Configuration
+
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -100,8 +27,17 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({ secret: 'omgnodeworks' }));
-  app.use(everyauth.middleware());
   app.use(app.router);
+  /*
+  app.use(express.session({
+    store: mongoStore(conn)
+  , secret: 'applecake'
+  }, function() {
+    app.use(app.router);
+  }));
+  */
+  app.use(passport.initialize());
+  //app.use(passport.session());
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -113,11 +49,36 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
-// Routes
+db = new DB.startup(conn);
 
+/*
+passport.use(new LocalStrategy(
+  function(email, password, done) {
+    console.log("Authentication -> Email : " + email + " , password : " + password);
+    db.verifyCredential(email, password, done);
+  }
+));
+*/
 // Routes
 app.get('/', routes.index);
-app.get('/login', routes.login);
+app.post('/login', passport.authenticate('local', {successFlash: 'Welcome!'}));
+
+/*
+app.post('/login', function(req, res, next) {
+	console.log("Authentication -> Email : " + req.body.email + " , password : " + req.body.password);
+  passport.authenticate('local', function(err, user, info) {
+    if (err) {
+      return next(err); // will generate a 500 error
+    }
+    // Generate a JSON response reflecting authentication status
+    if (! user) {
+      return res.send({ success : false, message : 'authentication failed' });
+    }
+    return res.send({ success : true, message : 'authentication succeeded' });
+  })(req, res, next);
+});
+*/
+app.post('/register', api.register);
 app.get('/partials/:name', routes.partials);
 
 // JSON API

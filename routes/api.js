@@ -4,6 +4,8 @@
 
 // For a real app, you'd make database requests here.
 // For this example, "data" acts like an in-memory "database"
+var db = require('../accessDB');
+
 var data = {
   "posts": [
     {
@@ -46,6 +48,23 @@ exports.post = function (req, res) {
 };
 
 // POST
+
+exports.register = function (req, res) {
+  var email = req.body.email,
+    password1 = req.body.password1,
+    password2 = req.body.password2;
+	
+	if(password1 !== password2){
+		res.json("密码不一致，请重新输入");
+	}
+	
+	db.saveUser({
+      email : email,
+	  password: password1
+    }, function(err,docs) {
+	  res.json({successful: true, userId:docs.id, email: email});
+    });
+};
 
 exports.editPost = function (req, res) {
   var id = req.body.id,

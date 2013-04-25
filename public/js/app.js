@@ -1,34 +1,17 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('myApp', ['myApp.filters', 'myApp.services', 'myApp.directives']).
+angular.module('wishList', ['wishList.filters', 'wishList.services', 'wishList.directives']).
   config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-    $routeProvider.when('/', {
-      templateUrl: 'partials/index',
-      controller: IndexCtrl
-    });
-    $routeProvider.when('/addPost', {
-      templateUrl: 'partials/addPost',
-      controller: AddPostCtrl
-    });
-    $routeProvider.when('/login', {
-        templateUrl: 'partials/login',
-        controller: LoginCtrl
-    });
-    $routeProvider.when('/readPost/:id', {
-      templateUrl: 'partials/readPost',
-      controller: ReadPostCtrl
-    });
-    $routeProvider.when('/editPost/:id', {
-      templateUrl: 'partials/editPost',
-      controller: EditPostCtrl
-    });
-    $routeProvider.when('/deletePost/:id', {
-      templateUrl: 'partials/deletePost',
-      controller: DeletePostCtrl
-    });
-    /*$routeProvider.otherwise({
-      redirectTo: '/'
-    });*/
+    
     $locationProvider.html5Mode(true);
+  }]).run(['$rootScope', '$http', '$location', function($rootScope, $http, $location){
+	$rootScope.isLogin = false;
+	$rootScope.checkUser = function () {
+        if ($rootScope.global.user) {
+            $rootScope.isLogin = true;
+        } else {
+            $rootScope.isLogin = false;
+        }
+    };
   }]);

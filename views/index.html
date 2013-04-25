@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html ng-app="myApp">
+<html ng-app="wishList">
 <head>
 	<meta charset="utf-8">
     <title><%= title %></title>
@@ -7,7 +7,7 @@
     <link rel='stylesheet' href='/stylesheets/bootstrap/css/bootstrap.min.css'/>
 </head>
 <body>
-<div class="navbar navbar-fixed-top" ng-controller="NavBarController">
+<div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -23,23 +23,67 @@
                     <li><a href="#">Contact</a></li>
                 </ul>
                 <ul class="nav pull-right">
-				<li>
-					<form class="form-inline">
+					<!--li>
+						<form class="navbar-form pull-right">
 							<input type="text" class="span2" placeholder="Email">
 							<input type="password" class="span2" placeholder="Password">
-							<button type="submit" class="btn ">Login</button>
+							<button type="submit" class="btn btn-primary">登录</button>
 						</form>
-				</li>
-                    <!--li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" dropdown>Login <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a ng-click="onTwitterLogin()"><img style="border: 0px"
-                                    src="https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png"
-                                    alt="With Twitter"></a></li>
-                            <li class="divider"></li>
-                            <li><a ng-click="onFacebookLogin()"><img src="/images/facebookLogin.png" alt="With Facebook"></a></li>
+					</li-->
+					<li class="dropdown" ng-controller="LoginController" ng-hide="isLogin">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" dropdown>登录<b class="caret"></b></a>
+                        <ul class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+							<li>{{msg}} </li>
+                            <li>
+								<form id="LoginForm">
+								  <fieldset>
+									<input type="text" id="inputEmail" placeholder="邮箱" ng-model="user.email" required>
+									<input type="password" id="inputPassword" placeholder="密码" ng-model="user.password" required>
+									<label class="checkbox">
+									  <input type="checkbox"> 记住我
+									</label>
+									<button type="submit" class="btn btn-large btn-block btn-primary" id="btnLogin" ng-click="onLogin(user)">登录</button>
+								</fieldset>
+							  </form>
+							</li>
                         </ul>
-                    </li-->
+                    </li>
+					<li ng-show="isLogin">
+					<p>你好{{localStorage.USER_EMAIL}}</p>
+					</li>
+					<li class="divider-vertical"></li>
+					<li class="dropdown" ng-controller="RegisterController">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" dropdown>注册 <b class="caret"></b></a>
+                        <ul class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                            <li>
+								<form class="form-horizontal" id="SignupForm">
+								 <div class="control-group">
+								  <label class="control-label" for="inputEmail" >邮箱</label>
+								  <div class="controls">
+									<input type="text" id="inputEmail" placeholder="Email" ng-model="user.email" required>
+								  </div>
+								</div>
+								<div class="control-group">
+								  <label class="control-label" for="inputPassword1" >密码</label>
+								  <div class="controls">
+									<input type="password" id="inputPassword1" placeholder="Password" ng-model="user.password1" required>
+								  </div>
+								</div>
+								<div class="control-group">
+								  <label class="control-label" for="inputPassword2">确认密码</label>
+								  <div class="controls">
+									<input type="password" id="inputPassword2" placeholder="Password Confirm" ng-model="user.password2" required>
+								  </div>
+								</div>
+								<div class="control-group">
+								  <div class="controls">
+									<button type="submit" class="btn btn-primary" id="btnLogin" ng-click="onRegister(user)">注册</button>
+								  </div>
+								</div>
+							  </form>
+							</li>
+                        </ul>
+                    </li>
                 </ul>
             </div><!-- /.nav-collapse -->
         </div>
@@ -58,4 +102,14 @@
 <script src="js/controllers.js"></script>
 <script src="js/filters.js"></script>
 <script src="js/directives.js"></script>
+<script language="javascript">
+	var showlogin = true;
+    $('.dropdown-toggle').dropdown();
+    $('.dropdown-menu').find('form').click(function (e) {
+        e.stopPropagation();
+      });
+	if(localStorage.Is_Login == true) {
+		showlogin=false;
+	}
+</script>
 </html>
