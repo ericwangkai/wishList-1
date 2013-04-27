@@ -4,8 +4,9 @@
  */
 
 var express = require('express'),
+	flash = require('connect-flash'),
+	passport = require('passport'),
     routes = require('./routes'),
-    passport = require('passport'),
     api = require('./routes/api');
 
 var app = module.exports = express();
@@ -27,7 +28,7 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.cookieParser());
   app.use(express.session({ secret: 'omgnodeworks' }));
-  app.use(app.router);
+  app.use(flash());
   /*
   app.use(express.session({
     store: mongoStore(conn)
@@ -38,6 +39,7 @@ app.configure(function(){
   */
   app.use(passport.initialize());
   //app.use(passport.session());
+  app.use(app.router);
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -61,7 +63,16 @@ passport.use(new LocalStrategy(
 */
 // Routes
 app.get('/', routes.index);
-app.post('/login', passport.authenticate('local', {successFlash: 'Welcome!'}));
+app.post('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+    if (!user) { return res.json("Email or Password incorrect"); }
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+      return res.json(user);
+    });
+  })(req, res, next);
+});
 
 /*
 app.post('/login', function(req, res, next) {

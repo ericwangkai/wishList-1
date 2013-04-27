@@ -4,7 +4,7 @@ var passport = require('passport'),
 
 var User = require('./models/user');
 
-passport.use(new LocalStrategy(
+passport.use(new LocalStrategy({ usernameField: 'email', passwordField: 'password' },
   function(email, password, done) {
     console.log("Authentication -> Email : " + email + " , password : " + password);
     User.findOne({ email: email }, function(err, user) {
@@ -12,9 +12,10 @@ passport.use(new LocalStrategy(
       if (!user) {
         return done(null, false, { message: 'Incorrect email.' });
       }
-      if (!user.validPassword(password)) {
+      if (!user.verifyPassword(password)) {
         return done(null, false, { message: 'Incorrect password.' });
       }
+	  console.log("Passed Password verification.");
       return done(null, user);
     });
   }
@@ -22,12 +23,12 @@ passport.use(new LocalStrategy(
 
 // serialize user on login
 passport.serializeUser(function(user, done) {
-  done(null, user.id);
+  done(null, user.email);
 });
 
 // deserialize user on logout
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function (err, user) {
+passport.deserializeUser(function(email, done) {
+  User.findOne(email, function (err, user) {
     done(err, user);
   });
 });

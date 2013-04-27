@@ -21,7 +21,9 @@ UserSchema.methods.setPassword = function (password, done){
 }
 
 UserSchema.method('verifyPassword', function(password, callback) {
-	if(this.password !== passport){
+	console.log("Password in DB -> " + this.hash);
+	console.log("Password in parameter -> " + password);
+	if(this.hash !== password){
 		return false;
 	}else{
 		return true;

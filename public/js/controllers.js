@@ -26,7 +26,10 @@ function LoginController($scope, $http) {
       password: user.password
     }).
     success(function(data, status, headers, config) {
-      localStorage.Is_Login = true;
+      alert(JSON.stringify(data));
+	  alert(JSON.stringify(status));
+	  alert(JSON.stringify(headers));
+	  alert(JSON.stringify(config));
     });
   };
 }
